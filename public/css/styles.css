@@ -390,6 +390,103 @@ textarea {
   margin-top: 8px;
 }
 
+/* Estilos para importación CSV */
+.file-upload-area {
+  border: 2px dashed #ddd;
+  border-radius: 10px;
+  padding: 30px;
+  text-align: center;
+  margin: 20px 0;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
+}
+
+.file-upload-area:hover {
+  border-color: var(--primary-color);
+  background: #f0f8ff;
+}
+
+.file-upload-area.dragover {
+  border-color: var(--primary-color);
+  background: #e3f2fd;
+}
+
+.upload-icon {
+  font-size: 48px;
+  margin-bottom: 15px;
+}
+
+.import-info {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.import-info h4 {
+  margin-bottom: 10px;
+  color: var(--primary-color);
+}
+
+.import-info ul {
+  margin: 10px 0;
+  padding-left: 20px;
+}
+
+.import-info li {
+  margin-bottom: 5px;
+}
+
+.import-options {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  margin: 20px 0;
+}
+
+.import-preview {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  margin: 20px 0;
+}
+
+.preview-table {
+  overflow-x: auto;
+  margin: 15px 0;
+}
+
+.preview-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.preview-table th,
+.preview-table td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.preview-table th {
+  background: #f8f9fa;
+  font-weight: 600;
+}
+
+.preview-stats {
+  font-size: 14px;
+  color: #666;
+  margin-top: 10px;
+}
+
+.modal-body {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
 /* Filtros */
 .filters-grid {
   display: grid;

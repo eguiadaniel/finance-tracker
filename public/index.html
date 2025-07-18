@@ -225,6 +225,7 @@
                         <div class="filter-actions">
                             <button class="btn btn-secondary" id="resetFiltersBtn">Limpiar Filtros</button>
                             <button class="btn btn-success" id="exportTransactionsBtn">Exportar CSV</button>
+                            <button class="btn btn-primary" id="importCSVBtn">📥 Importar CSV</button>
                         </div>
                     </div>
                 </div>
@@ -310,6 +311,66 @@
                     <button type="submit" class="btn btn-primary">Guardar Cambios</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal de importación CSV -->
+    <div id="importModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📥 Importar Transacciones desde CSV</h3>
+                <button class="close-btn" id="closeImportModalBtn">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="import-info">
+                    <h4>Formato requerido:</h4>
+                    <p>Tu archivo CSV debe tener las siguientes columnas <strong>separadas por pipe (|)</strong>:</p>
+                    <ul>
+                        <li><strong>FECHA CONTABLE:</strong> Fecha de la transacción (DD/MM/YYYY)</li>
+                        <li><strong>FECHA VALOR:</strong> Fecha valor (DD/MM/YYYY)</li>
+                        <li><strong>DESCRIPCION:</strong> Descripción de la transacción</li>
+                        <li><strong>IMPORTE:</strong> Cantidad (números positivos para ingresos, negativos para gastos)</li>
+                        <li><strong>SALDO:</strong> Saldo posterior a la transacción</li>
+                    </ul>
+                    <p><strong>Ejemplo:</strong></p>
+                    <code>FECHA CONTABLE|FECHA VALOR|DESCRIPCION|IMPORTE|SALDO</code>
+                </div>
+                
+                <div class="file-upload-area" id="fileUploadArea">
+                    <div class="upload-icon">📁</div>
+                    <p>Arrastra tu archivo CSV aquí o haz clic para seleccionar</p>
+                    <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
+                    <button class="btn btn-outline" id="selectFileBtn">Seleccionar archivo</button>
+                </div>
+                
+                <div class="import-options" id="importOptions" style="display: none;">
+                    <h4>Opciones de importación:</h4>
+                    <div class="form-group">
+                        <label for="defaultCategory">Categoría por defecto para gastos:</label>
+                        <select id="defaultCategory">
+                            <option value="">Seleccionar categoría...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="defaultIncomeCategory">Categoría por defecto para ingresos:</label>
+                        <select id="defaultIncomeCategory">
+                            <option value="">Seleccionar categoría...</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="import-preview" id="importPreview" style="display: none;">
+                    <h4>Vista previa (primeras 5 filas):</h4>
+                    <div class="preview-table"></div>
+                    <p class="preview-stats"></p>
+                </div>
+            </div>
+            
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" id="cancelImportBtn">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="confirmImportBtn" style="display: none;">Importar Transacciones</button>
+            </div>
         </div>
     </div>
 

@@ -93,7 +93,7 @@ const initializeDatabase = async () => {
       CREATE TABLE IF NOT EXISTS transactions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         description TEXT NOT NULL,
-        amount DECIMAL(10, 2) NOT NULL,
+        amount DECIMAL(15, 2) NOT NULL,
         type TEXT NOT NULL CHECK (type IN ('income', 'expense')),
         category_id INTEGER NOT NULL,
         user_id INTEGER NOT NULL,
@@ -112,7 +112,7 @@ const initializeDatabase = async () => {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         category_id INTEGER NOT NULL,
-        amount DECIMAL(10, 2) NOT NULL,
+        amount DECIMAL(15, 2) NOT NULL,
         period TEXT NOT NULL CHECK (period IN ('monthly', 'yearly')),
         user_id INTEGER NOT NULL,
         start_date DATE NOT NULL,

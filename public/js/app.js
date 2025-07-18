@@ -72,6 +72,10 @@ class FinanceApp {
       this.exportTransactions();
     });
 
+    document.getElementById('importCSVBtn').addEventListener('click', () => {
+      this.openImportModal();
+    });
+
     // Botones de paginación
     document.getElementById('prevBtn').addEventListener('click', () => {
       if (this.currentPage > 1) {
@@ -108,6 +112,68 @@ class FinanceApp {
     document.getElementById('editModal').addEventListener('click', (e) => {
       if (e.target.id === 'editModal') {
         this.closeEditModal();
+      }
+    });
+
+    // Event listeners para importación CSV
+    this.setupCSVImportListeners();
+  }
+
+  setupCSVImportListeners() {
+    const fileInput = document.getElementById('csvFileInput');
+    const fileUploadArea = document.getElementById('fileUploadArea');
+    const selectFileBtn = document.getElementById('selectFileBtn');
+    const importModal = document.getElementById('importModal');
+    
+    // Abrir selector de archivo
+    selectFileBtn.addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    // Manejar selección de archivo
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        this.handleFileSelect(e.target.files[0]);
+      }
+    });
+
+    // Drag and drop
+    fileUploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      fileUploadArea.classList.add('dragover');
+    });
+
+    fileUploadArea.addEventListener('dragleave', () => {
+      fileUploadArea.classList.remove('dragover');
+    });
+
+    fileUploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      fileUploadArea.classList.remove('dragover');
+      
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        this.handleFileSelect(files[0]);
+      }
+    });
+
+    // Botones del modal
+    document.getElementById('closeImportModalBtn').addEventListener('click', () => {
+      this.closeImportModal();
+    });
+
+    document.getElementById('cancelImportBtn').addEventListener('click', () => {
+      this.closeImportModal();
+    });
+
+    document.getElementById('confirmImportBtn').addEventListener('click', () => {
+      this.confirmImport();
+    });
+
+    // Cerrar modal al hacer clic fuera
+    importModal.addEventListener('click', (e) => {
+      if (e.target.id === 'importModal') {
+        this.closeImportModal();
       }
     });
   }
@@ -487,6 +553,258 @@ class FinanceApp {
     } catch (error) {
       console.error('Error exportando transacciones:', error);
       showNotification('Error al exportar las transacciones', 'error');
+    }
+  }
+
+  // Métodos para importación CSV
+  openImportModal() {
+    // Cargar categorías en los selectores
+    this.loadCategoriesForImport();
+    
+    // Mostrar modal
+    document.getElementById('importModal').style.display = 'flex';
+    
+    // Resetear el formulario
+    this.resetImportForm();
+  }
+
+  closeImportModal() {
+    document.getElementById('importModal').style.display = 'none';
+    this.resetImportForm();
+  }
+
+  resetImportForm() {
+    document.getElementById('csvFileInput').value = '';
+    document.getElementById('importOptions').style.display = 'none';
+    document.getElementById('importPreview').style.display = 'none';
+    document.getElementById('confirmImportBtn').style.display = 'none';
+    this.csvData = null;
+  }
+
+  loadCategoriesForImport() {
+    const defaultCategory = document.getElementById('defaultCategory');
+    const defaultIncomeCategory = document.getElementById('defaultIncomeCategory');
+    
+    // Limpiar opciones existentes
+    defaultCategory.innerHTML = '<option value="">Seleccionar categoría...</option>';
+    defaultIncomeCategory.innerHTML = '<option value="">Seleccionar categoría...</option>';
+    
+    // Cargar categorías de gastos
+    this.categories.filter(cat => cat.type === 'expense').forEach(category => {
+      const option = document.createElement('option');
+      option.value = category.id;
+      option.textContent = `${category.icon} ${category.name}`;
+      defaultCategory.appendChild(option);
+    });
+    
+    // Cargar categorías de ingresos
+    this.categories.filter(cat => cat.type === 'income').forEach(category => {
+      const option = document.createElement('option');
+      option.value = category.id;
+      option.textContent = `${category.icon} ${category.name}`;
+      defaultIncomeCategory.appendChild(option);
+    });
+  }
+
+  handleFileSelect(file) {
+    if (!file.name.toLowerCase().endsWith('.csv')) {
+      showNotification('Por favor, selecciona un archivo CSV válido', 'error');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB max
+      showNotification('El archivo es demasiado grande. Máximo 5MB', 'error');
+      return;
+    }
+
+    this.parseCSV(file);
+  }
+
+  // Función para convertir números europeos (26.075,27) a formato JavaScript (26075.27)
+  parseEuropeanNumber(numberStr) {
+    if (!numberStr || numberStr.trim() === '') return 0;
+    
+    let cleanStr = numberStr.trim();
+    
+    // Si tiene signo negativo, guardarlo
+    const isNegative = cleanStr.startsWith('-');
+    if (isNegative) {
+      cleanStr = cleanStr.substring(1);
+    }
+    
+    // Convertir formato europeo a formato JavaScript
+    // 26.075,27 -> 26075.27
+    // 1.234.567,89 -> 1234567.89
+    if (cleanStr.includes(',')) {
+      // Tiene decimales (coma)
+      const parts = cleanStr.split(',');
+      if (parts.length === 2) {
+        // Remover puntos de la parte entera (separadores de millares)
+        const integerPart = parts[0].replace(/\./g, '');
+        const decimalPart = parts[1];
+        cleanStr = integerPart + '.' + decimalPart;
+      }
+    } else if (cleanStr.includes('.')) {
+      // Verificar si el punto es separador de millares o decimal
+      const parts = cleanStr.split('.');
+      if (parts.length > 2) {
+        // Multiple puntos = separadores de millares
+        // 1.234.567 -> 1234567
+        cleanStr = cleanStr.replace(/\./g, '');
+      } else if (parts.length === 2 && parts[1].length > 2) {
+        // Punto con más de 2 dígitos después = separador de millares
+        // 1.234567 -> 1234567
+        cleanStr = cleanStr.replace(/\./g, '');
+      }
+      // Si tiene exactamente 2 dígitos después del punto, lo dejamos como decimal
+    }
+    
+    const result = parseFloat(cleanStr);
+    return isNegative ? -result : result;
+  }
+
+  parseCSV(file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const csvText = e.target.result;
+        const lines = csvText.split('\n').filter(line => line.trim());
+        
+        if (lines.length < 2) {
+          showNotification('El archivo CSV debe tener al menos una cabecera y una fila de datos', 'error');
+          return;
+        }
+
+        const headers = lines[0].split('|').map(h => h.trim().replace(/"/g, ''));
+        const expectedHeaders = ['FECHA CONTABLE', 'FECHA VALOR', 'DESCRIPCION', 'IMPORTE', 'SALDO'];
+        
+        // Verificar que las cabeceras coincidan (sin importar mayúsculas/minúsculas)
+        const normalizedHeaders = headers.map(h => h.toUpperCase());
+        const missingHeaders = expectedHeaders.filter(h => !normalizedHeaders.includes(h));
+        if (missingHeaders.length > 0) {
+          showNotification(`Faltan las siguientes cabeceras: ${missingHeaders.join(', ')}`, 'error');
+          return;
+        }
+
+        // Procesar datos
+        const transactions = [];
+        for (let i = 1; i < lines.length; i++) {
+          const values = lines[i].split('|').map(v => v.trim().replace(/"/g, ''));
+          
+          if (values.length >= expectedHeaders.length) {
+            const transaction = {};
+            headers.forEach((header, index) => {
+              // Normalizar la clave a mayúsculas para consistencia
+              const normalizedHeader = header.toUpperCase();
+              transaction[normalizedHeader] = values[index];
+            });
+            transactions.push(transaction);
+          }
+        }
+
+        if (transactions.length === 0) {
+          showNotification('No se encontraron transacciones válidas en el archivo', 'error');
+          return;
+        }
+
+        this.csvData = transactions;
+        this.showImportPreview();
+        
+      } catch (error) {
+        console.error('Error parsing CSV:', error);
+        showNotification('Error al procesar el archivo CSV', 'error');
+      }
+    };
+
+    reader.readAsText(file);
+  }
+
+  showImportPreview() {
+    const preview = document.getElementById('importPreview');
+    const previewTable = preview.querySelector('.preview-table');
+    const previewStats = preview.querySelector('.preview-stats');
+    
+    // Mostrar opciones y vista previa
+    document.getElementById('importOptions').style.display = 'block';
+    preview.style.display = 'block';
+    document.getElementById('confirmImportBtn').style.display = 'inline-block';
+    
+    // Crear tabla de vista previa
+    const first5 = this.csvData.slice(0, 5);
+    let tableHtml = `
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Descripción</th>
+            <th>Importe</th>
+            <th>Tipo</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+    
+    first5.forEach(row => {
+      const amount = this.parseEuropeanNumber(row.IMPORTE);
+      const type = amount >= 0 ? 'Ingreso' : 'Gasto';
+      tableHtml += `
+        <tr>
+          <td>${row['FECHA CONTABLE']}</td>
+          <td>${row.DESCRIPCION}</td>
+          <td>${Math.abs(amount).toFixed(2)}€</td>
+          <td>${type}</td>
+        </tr>
+      `;
+    });
+    
+    tableHtml += '</tbody></table>';
+    previewTable.innerHTML = tableHtml;
+    
+    // Estadísticas
+    const totalTransactions = this.csvData.length;
+    const incomeCount = this.csvData.filter(t => this.parseEuropeanNumber(t.IMPORTE) >= 0).length;
+    const expenseCount = totalTransactions - incomeCount;
+    
+    previewStats.innerHTML = `
+      <strong>Total:</strong> ${totalTransactions} transacciones | 
+      <strong>Ingresos:</strong> ${incomeCount} | 
+      <strong>Gastos:</strong> ${expenseCount}
+    `;
+  }
+
+  async confirmImport() {
+    if (!this.csvData || this.csvData.length === 0) {
+      showNotification('No hay datos para importar', 'error');
+      return;
+    }
+
+    const defaultCategoryId = document.getElementById('defaultCategory').value;
+    const defaultIncomeCategoryId = document.getElementById('defaultIncomeCategory').value;
+    
+    if (!defaultCategoryId || !defaultIncomeCategoryId) {
+      showNotification('Por favor, selecciona las categorías por defecto', 'error');
+      return;
+    }
+
+    try {
+      const importData = {
+        transactions: this.csvData,
+        defaultExpenseCategory: defaultCategoryId,
+        defaultIncomeCategory: defaultIncomeCategoryId
+      };
+
+      const response = await apiClient.importTransactions(importData);
+      
+      showNotification(`¡Éxito! ${response.imported} transacciones importadas`, 'success');
+      this.closeImportModal();
+      
+      // Recargar datos
+      await this.loadStats();
+      await this.loadTransactions();
+      
+    } catch (error) {
+      console.error('Error importando transacciones:', error);
+      showNotification(error.message || 'Error al importar las transacciones', 'error');
     }
   }
 }

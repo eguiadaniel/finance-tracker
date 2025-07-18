@@ -58,6 +58,13 @@ class APIClient {
     });
   }
 
+  async importTransactions(importData) {
+    return await this.request('/transactions/import', {
+      method: 'POST',
+      body: JSON.stringify(importData)
+    });
+  }
+
   async getTransaction(id) {
     return await this.request(`/transactions/${id}`);
   }
