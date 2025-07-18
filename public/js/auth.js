@@ -1,3 +1,42 @@
+// Sistema de notificaciones (versión temporal para auth)
+function showNotification(message, type = 'info') {
+  // Si la función global ya existe, usarla
+  if (window.showNotification && window.showNotification !== showNotification) {
+    return window.showNotification(message, type);
+  }
+  
+  // Crear notificación temporal
+  const notification = document.createElement('div');
+  notification.className = `notification ${type}`;
+  notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: ${type === 'error' ? '#f44336' : type === 'success' ? '#4CAF50' : '#2196F3'};
+    color: white;
+    padding: 15px 20px;
+    border-radius: 5px;
+    z-index: 10000;
+    font-family: Arial, sans-serif;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  `;
+  notification.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <span>${message}</span>
+      <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: white; font-size: 18px; cursor: pointer; margin-left: 15px;">&times;</button>
+    </div>
+  `;
+
+  document.body.appendChild(notification);
+
+  // Auto-remove después de 5 segundos
+  setTimeout(() => {
+    if (notification.parentElement) {
+      notification.remove();
+    }
+  }, 5000);
+}
+
 // Gestión de autenticación
 class AuthManager {
   constructor() {
@@ -114,7 +153,10 @@ class AuthManager {
     
     // Mostrar información del usuario
     if (this.user) {
-      document.getElementById('userWelcome').textContent = `Hola, ${this.user.username}`;
+      const welcomeText = this.user.username === 'demo' ? 
+        `🚀 Modo Demo` : 
+        `Hola, ${this.user.username}`;
+      document.getElementById('userWelcome').textContent = welcomeText;
     }
     
     // Inicializar la aplicación
@@ -131,31 +173,37 @@ class AuthManager {
   }
 }
 
-// Crear instancia global
-const authManager = new AuthManager();
+// Crear instancia global después de que el DOM esté listo
+let authManager;
 
-// Funciones para los formularios
-function switchTab(tab) {
-  const loginForm = document.getElementById('loginForm');
-  const registerForm = document.getElementById('registerForm');
-  const loginTab = document.querySelector('.tab-btn:first-child');
-  const registerTab = document.querySelector('.tab-btn:last-child');
-
-  if (tab === 'login') {
-    loginForm.style.display = 'block';
-    registerForm.style.display = 'none';
-    loginTab.classList.add('active');
-    registerTab.classList.remove('active');
-  } else {
-    loginForm.style.display = 'none';
-    registerForm.style.display = 'block';
-    loginTab.classList.remove('active');
-    registerTab.classList.add('active');
-  }
-}
-
-// Event listeners para los formularios
+// Inicializar después de que el DOM esté listo
 document.addEventListener('DOMContentLoaded', function() {
+  authManager = new AuthManager();
+  window.authManager = authManager;
+  
+  // Event listeners para los tabs
+  document.getElementById('loginTabBtn').addEventListener('click', function() {
+    switchTab('login');
+  });
+  
+  document.getElementById('registerTabBtn').addEventListener('click', function() {
+    switchTab('register');
+  });
+  
+  // Event listener para el botón demo
+  document.getElementById('demoLoginBtn').addEventListener('click', function() {
+    loginAsDemo();
+  });
+  
+  // Event listener para logout
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', function() {
+      logout();
+    });
+  }
+  
+  // Event listeners para los formularios
   // Formulario de login
   document.getElementById('loginForm').addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -217,10 +265,51 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
+// Funciones para los formularios
+function switchTab(tab) {
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
+  const loginTab = document.querySelector('.tab-btn:first-child');
+  const registerTab = document.querySelector('.tab-btn:last-child');
+
+  if (tab === 'login') {
+    loginForm.style.display = 'block';
+    registerForm.style.display = 'none';
+    loginTab.classList.add('active');
+    registerTab.classList.remove('active');
+  } else {
+    loginForm.style.display = 'none';
+    registerForm.style.display = 'block';
+    loginTab.classList.remove('active');
+    registerTab.classList.add('active');
+  }
+}
+
+// Función para login como demo
+async function loginAsDemo() {
+  if (!authManager) {
+    showNotification('Error: Sistema no inicializado', 'error');
+    return;
+  }
+  
+  const success = await authManager.login('demo', 'demo123');
+  if (success) {
+    showNotification('¡Bienvenido al modo demo! 🚀', 'success');
+    // Agregar notificación adicional sobre el modo demo
+    setTimeout(() => {
+      showNotification('Modo Demo: Tus datos se guardan temporalmente y pueden ser reiniciados', 'info');
+    }, 2000);
+  }
+}
+
 // Función para cerrar sesión
 function logout() {
   authManager.logout();
 }
 
-// Exponer authManager globalmente
+// Exponer funciones globalmente
 window.authManager = authManager;
+window.loginAsDemo = loginAsDemo;
+window.showNotification = showNotification;
+window.switchTab = switchTab;
+window.logout = logout;

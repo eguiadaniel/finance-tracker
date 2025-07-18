@@ -23,8 +23,8 @@
             </div>
             
             <div class="auth-tabs">
-                <button class="tab-btn active" onclick="switchTab('login')">Iniciar Sesión</button>
-                <button class="tab-btn" onclick="switchTab('register')">Registrarse</button>
+                <button class="tab-btn active" id="loginTabBtn" data-tab="login">Iniciar Sesión</button>
+                <button class="tab-btn" id="registerTabBtn" data-tab="register">Registrarse</button>
             </div>
 
             <!-- Formulario de Login -->
@@ -40,6 +40,16 @@
                 </div>
                 
                 <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+                
+                <div class="demo-section">
+                    <div class="demo-divider">
+                        <span>o</span>
+                    </div>
+                    <button type="button" class="btn btn-demo" id="demoLoginBtn">
+                        🚀 Probar sin registro
+                    </button>
+                    <p class="demo-text">Explora la aplicación sin necesidad de crear una cuenta</p>
+                </div>
             </form>
 
             <!-- Formulario de Registro -->
@@ -79,7 +89,7 @@
                 </div>
                 <div class="header-right">
                     <span id="userWelcome"></span>
-                    <button class="btn btn-secondary" onclick="logout()">Cerrar Sesión</button>
+                    <button class="btn btn-secondary" id="logoutBtn">Cerrar Sesión</button>
                 </div>
             </div>
         </header>
@@ -213,8 +223,8 @@
                         </div>
                         
                         <div class="filter-actions">
-                            <button class="btn btn-secondary" onclick="resetFilters()">Limpiar Filtros</button>
-                            <button class="btn btn-success" onclick="exportTransactions()">Exportar CSV</button>
+                            <button class="btn btn-secondary" id="resetFiltersBtn">Limpiar Filtros</button>
+                            <button class="btn btn-success" id="exportTransactionsBtn">Exportar CSV</button>
                         </div>
                     </div>
                 </div>
@@ -238,9 +248,9 @@
                     </div>
                     
                     <div class="pagination" id="pagination" style="display: none;">
-                        <button class="btn btn-outline" onclick="loadTransactions(currentPage - 1)" id="prevBtn">← Anterior</button>
+                        <button class="btn btn-outline" id="prevBtn">← Anterior</button>
                         <span id="pageInfo">Página 1 de 1</span>
-                        <button class="btn btn-outline" onclick="loadTransactions(currentPage + 1)" id="nextBtn">Siguiente →</button>
+                        <button class="btn btn-outline" id="nextBtn">Siguiente →</button>
                     </div>
                 </div>
             </section>
@@ -252,7 +262,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3>Editar Transacción</h3>
-                <button class="close-btn" onclick="closeEditModal()">&times;</button>
+                <button class="close-btn" id="closeEditModalBtn">&times;</button>
             </div>
             
             <form id="editTransactionForm">
@@ -296,7 +306,7 @@
                 </div>
                 
                 <div class="modal-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancelar</button>
+                    <button type="button" class="btn btn-secondary" id="cancelEditBtn">Cancelar</button>
                     <button type="submit" class="btn btn-primary">Guardar Cambios</button>
                 </div>
             </form>

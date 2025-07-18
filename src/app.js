@@ -13,7 +13,8 @@ app.use(helmet({
     directives: {
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+      scriptSrcAttr: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", "data:", "https:"],
     },
   },
@@ -60,7 +61,7 @@ app.get('/health', (req, res) => {
 });
 
 // Manejo de rutas no encontradas
-app.use('*', (req, res) => {
+app.use((req, res) => {
   res.status(404).json({
     error: 'Ruta no encontrada',
     message: `La ruta ${req.originalUrl} no existe`

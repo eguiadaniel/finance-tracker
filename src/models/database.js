@@ -127,6 +127,9 @@ const initializeDatabase = async () => {
     // Insertar categorías por defecto
     await insertDefaultCategories();
 
+    // Crear usuario demo
+    await createDemoUser();
+
     console.log('✅ Tablas de la base de datos creadas correctamente');
   } catch (error) {
     console.error('❌ Error al inicializar la base de datos:', error);
@@ -164,6 +167,26 @@ const insertDefaultCategories = async () => {
     } catch (error) {
       console.error('Error al insertar categoría:', category.name, error);
     }
+  }
+};
+
+// Crear usuario demo
+const createDemoUser = async () => {
+  try {
+    const bcrypt = require('bcryptjs');
+    const saltRounds = 10;
+    const demoPassword = 'demo123';
+    const passwordHash = await bcrypt.hash(demoPassword, saltRounds);
+
+    // Crear usuario demo si no existe
+    await runQuery(`
+      INSERT OR IGNORE INTO users (username, email, password_hash)
+      VALUES ('demo', 'demo@financetracker.com', ?)
+    `, [passwordHash]);
+
+    console.log('✅ Usuario demo creado/verificado');
+  } catch (error) {
+    console.error('❌ Error al crear usuario demo:', error);
   }
 };
 

@@ -63,9 +63,38 @@ class FinanceApp {
       }, 500)
     );
 
+    // Botones de filtros
+    document.getElementById('resetFiltersBtn').addEventListener('click', () => {
+      this.resetFilters();
+    });
+
+    document.getElementById('exportTransactionsBtn').addEventListener('click', () => {
+      this.exportTransactions();
+    });
+
+    // Botones de paginación
+    document.getElementById('prevBtn').addEventListener('click', () => {
+      if (this.currentPage > 1) {
+        this.loadTransactions(this.currentPage - 1);
+      }
+    });
+
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      this.loadTransactions(this.currentPage + 1);
+    });
+
     // Formulario de edición
     document.getElementById('editTransactionForm').addEventListener('submit', (e) => {
       this.handleEditSubmit(e);
+    });
+
+    // Botones del modal
+    document.getElementById('closeEditModalBtn').addEventListener('click', () => {
+      this.closeEditModal();
+    });
+
+    document.getElementById('cancelEditBtn').addEventListener('click', () => {
+      this.closeEditModal();
     });
 
     // Cerrar modal con ESC
@@ -246,16 +275,31 @@ class FinanceApp {
             ${transaction.type === 'income' ? '+' : '-'}${APIUtils.formatCurrency(transaction.amount)}
           </div>
           <div class="transaction-buttons">
-            <button class="btn btn-small btn-edit" onclick="app.editTransaction(${transaction.id})">
+            <button class="btn btn-small btn-edit" data-transaction-id="${transaction.id}" data-action="edit">
               ✏️ Editar
             </button>
-            <button class="btn btn-small btn-delete" onclick="app.deleteTransaction(${transaction.id})">
+            <button class="btn btn-small btn-delete" data-transaction-id="${transaction.id}" data-action="delete">
               🗑️ Eliminar
             </button>
           </div>
         </div>
       </div>
     `).join('');
+    
+    // Agregar event listeners a los botones de transacciones
+    container.querySelectorAll('.btn-edit').forEach(button => {
+      button.addEventListener('click', (e) => {
+        const transactionId = e.target.dataset.transactionId;
+        this.editTransaction(transactionId);
+      });
+    });
+    
+    container.querySelectorAll('.btn-delete').forEach(button => {
+      button.addEventListener('click', (e) => {
+        const transactionId = e.target.dataset.transactionId;
+        this.deleteTransaction(transactionId);
+      });
+    });
   }
 
   updatePagination(response) {

@@ -10,7 +10,7 @@ class APIClient {
     const config = {
       headers: {
         'Content-Type': 'application/json',
-        ...authManager.getAuthHeaders(),
+        ...(window.authManager ? window.authManager.getAuthHeaders() : {}),
         ...options.headers
       },
       ...options
