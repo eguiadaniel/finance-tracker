@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Tracker - Control de Finanzas Personal</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+</head>
+<body>
+    <!-- Pantalla de carga -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-spinner"></div>
+        <p>Cargando Finance Tracker...</p>
+    </div>
+
+    <!-- Pantalla de login -->
+    <div id="loginScreen" class="auth-screen" style="display: none;">
+        <div class="auth-container">
+            <div class="auth-header">
+                <h1>💰 Finance Tracker</h1>
+                <p>Control inteligente de tus finanzas personales</p>
+            </div>
+            
+            <div class="auth-tabs">
+                <button class="tab-btn active" onclick="switchTab('login')">Iniciar Sesión</button>
+                <button class="tab-btn" onclick="switchTab('register')">Registrarse</button>
+            </div>
+
+            <!-- Formulario de Login -->
+            <form id="loginForm" class="auth-form">
+                <div class="form-group">
+                    <label for="loginUsername">Usuario o Email:</label>
+                    <input type="text" id="loginUsername" name="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="loginPassword">Contraseña:</label>
+                    <input type="password" id="loginPassword" name="password" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+            </form>
+
+            <!-- Formulario de Registro -->
+            <form id="registerForm" class="auth-form" style="display: none;">
+                <div class="form-group">
+                    <label for="registerUsername">Usuario:</label>
+                    <input type="text" id="registerUsername" name="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="registerEmail">Email:</label>
+                    <input type="email" id="registerEmail" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="registerPassword">Contraseña:</label>
+                    <input type="password" id="registerPassword" name="password" required minlength="6">
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirmPassword">Confirmar Contraseña:</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Registrarse</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Aplicación principal -->
+    <div id="app" class="app" style="display: none;">
+        <!-- Header con navegación -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1>💰 Finance Tracker</h1>
+                </div>
+                <div class="header-right">
+                    <span id="userWelcome"></span>
+                    <button class="btn btn-secondary" onclick="logout()">Cerrar Sesión</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="container">
+            <!-- Dashboard de estadísticas -->
+            <section class="stats-section">
+                <div class="stats-grid">
+                    <div class="stat-card income">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-content">
+                            <h3>Ingresos Totales</h3>
+                            <div class="stat-value" id="totalIncome">€0.00</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card expense">
+                        <div class="stat-icon">💸</div>
+                        <div class="stat-content">
+                            <h3>Gastos Totales</h3>
+                            <div class="stat-value" id="totalExpenses">€0.00</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card balance">
+                        <div class="stat-icon">⚖️</div>
+                        <div class="stat-content">
+                            <h3>Balance</h3>
+                            <div class="stat-value" id="balance">€0.00</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card savings">
+                        <div class="stat-icon">🎯</div>
+                        <div class="stat-content">
+                            <h3>Tasa de Ahorro</h3>
+                            <div class="stat-value" id="savingsRate">0%</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Formulario de nueva transacción y filtros -->
+            <section class="main-content">
+                <div class="content-grid">
+                    <!-- Formulario de nueva transacción -->
+                    <div class="card">
+                        <h2>Nueva Transacción</h2>
+                        <form id="transactionForm">
+                            <div class="form-group">
+                                <label for="description">Descripción:</label>
+                                <input type="text" id="description" name="description" required>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="amount">Cantidad (€):</label>
+                                    <input type="number" id="amount" name="amount" step="0.01" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="type">Tipo:</label>
+                                    <select id="type" name="type" required>
+                                        <option value="">Seleccionar...</option>
+                                        <option value="income">Ingreso</option>
+                                        <option value="expense">Gasto</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="category">Categoría:</label>
+                                    <select id="category" name="category_id" required>
+                                        <option value="">Seleccionar...</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="date">Fecha:</label>
+                                    <input type="date" id="date" name="date" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="notes">Notas (opcional):</label>
+                                <textarea id="notes" name="notes" rows="2"></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">Añadir Transacción</button>
+                        </form>
+                    </div>
+
+                    <!-- Filtros y búsqueda -->
+                    <div class="card">
+                        <h2>Filtros y Búsqueda</h2>
+                        
+                        <div class="filters-grid">
+                            <div class="form-group">
+                                <label for="filterType">Tipo:</label>
+                                <select id="filterType">
+                                    <option value="">Todos</option>
+                                    <option value="income">Ingresos</option>
+                                    <option value="expense">Gastos</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="filterCategory">Categoría:</label>
+                                <select id="filterCategory">
+                                    <option value="">Todas</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="startDate">Desde:</label>
+                                <input type="date" id="startDate">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="endDate">Hasta:</label>
+                                <input type="date" id="endDate">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="searchText">Buscar:</label>
+                            <input type="text" id="searchText" placeholder="Buscar por descripción...">
+                        </div>
+                        
+                        <div class="filter-actions">
+                            <button class="btn btn-secondary" onclick="resetFilters()">Limpiar Filtros</button>
+                            <button class="btn btn-success" onclick="exportTransactions()">Exportar CSV</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lista de transacciones -->
+            <section class="transactions-section">
+                <div class="card">
+                    <div class="transactions-header">
+                        <h2>Transacciones Recientes</h2>
+                        <div class="pagination-info">
+                            <span id="transactionCount">0 transacciones</span>
+                        </div>
+                    </div>
+                    
+                    <div id="transactionsList" class="transactions-list">
+                        <div class="loading-transactions">
+                            <div class="loading-spinner small"></div>
+                            <p>Cargando transacciones...</p>
+                        </div>
+                    </div>
+                    
+                    <div class="pagination" id="pagination" style="display: none;">
+                        <button class="btn btn-outline" onclick="loadTransactions(currentPage - 1)" id="prevBtn">← Anterior</button>
+                        <span id="pageInfo">Página 1 de 1</span>
+                        <button class="btn btn-outline" onclick="loadTransactions(currentPage + 1)" id="nextBtn">Siguiente →</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Modal de edición -->
+    <div id="editModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Editar Transacción</h3>
+                <button class="close-btn" onclick="closeEditModal()">&times;</button>
+            </div>
+            
+            <form id="editTransactionForm">
+                <input type="hidden" id="editTransactionId">
+                
+                <div class="form-group">
+                    <label for="editDescription">Descripción:</label>
+                    <input type="text" id="editDescription" name="description" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editAmount">Cantidad (€):</label>
+                        <input type="number" id="editAmount" name="amount" step="0.01" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editType">Tipo:</label>
+                        <select id="editType" name="type" required>
+                            <option value="income">Ingreso</option>
+                            <option value="expense">Gasto</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editCategory">Categoría:</label>
+                        <select id="editCategory" name="category_id" required></select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editDate">Fecha:</label>
+                        <input type="date" id="editDate" name="date" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editNotes">Notas:</label>
+                    <textarea id="editNotes" name="notes" rows="2"></textarea>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notificaciones -->
+    <div id="notifications" class="notifications"></div>
+
+    <script src="/js/auth.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>
